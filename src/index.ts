@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * bulk-email-processor - Queue-based bulk email processing with templates
- * Built with Zo Computer by The BookMaster
+ * Built by Retsumdk
  */
 
 import { Command } from "commander";
