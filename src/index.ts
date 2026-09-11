@@ -1,51 +1,33 @@
-#!/usr/bin/env bun
 /**
- * bulk-email-processor - Queue-based bulk email processing with templates
- * Built by Retsumdk
+ * bulk-email-processor — queue-based bulk email processing with templates.
+ *
+ * A dependency-free, send-ready bulk email engine: a real template engine
+ * (conditionals, loops, helpers, HTML auto-escaping), CSV recipient loading
+ * with validation/dedup/suppression, a persistent FIFO outbox with retry
+ * backoff and dead-lettering, sliding-window rate limiting, pluggable
+ * transports (console/log-only or any REST mail API), and a batch pipeline
+ * that reports sent/failed/deferred/dead-lettered counts.
+ *
+ * Built by Retsumdk.
  */
+export type {
+  Recipient,
+  Letter,
+  SendStatus,
+  SendResult,
+  MailProvider,
+  BatchReport,
+  TemplateBundle,
+  SendOptions,
+} from "./types.ts";
 
-import { Command } from "commander";
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+export { Outbox } from "./queue.ts";
+export type { QueuedMessage } from "./queue.ts";
 
-interface Config {
-  apiKey?: string;
-  baseUrl: string;
-  timeout: number;
-  retries: number;
-}
+export { parseCsv, tokenizeCsv, rowsToRecipients, loadRecipients, dedupe, partition, ctxFor } from "./recipients.ts";
+export { parse, render, renderTemplate } from "./template.ts";
 
-const DEFAULTS: Config = {
-  baseUrl: "https://api.example.com",
-  timeout: 30000,
-  retries: 3,
-};
+export { ConsoleProvider, HttpProvider } from "./providers/index.ts";
+export type { HttpProviderOptions } from "./providers/http.ts";
 
-function loadConfig(): Config {
-  const cfgPath = join(process.cwd(), "config.json");
-  if (existsSync(cfgPath)) {
-    try {
-      return { ...DEFAULTS, ...JSON.parse(readFileSync(cfgPath, "utf-8")) };
-    } catch { /* ignore */ }
-  }
-  return { ...DEFAULTS };
-}
-
-async function main(cfg: Config) {
-  console.log(`[${name}] Connected to ${cfg.baseUrl}`);
-  console.log(`[${name}] Timeout: ${cfg.timeout}ms | Retries: ${cfg.retries}`);
-  // TODO: implement your logic here
-  console.log(`[${name}] Done.`);
-}
-
-const program = new Command();
-program.name("bulk-email-processor").description("Queue-based bulk email processing with templates").version("1.0.0")
-  .option("-c, --config <path>", "Config file path", "config.json")
-  .option("-v, --verbose", "Verbose mode")
-  .action(async (opts) => {
-    const cfg = loadConfig();
-    if (opts.verbose) console.log("Verbose mode on");
-    try { await main(cfg); }
-    catch (e) { console.error(`Error: ${e}`); process.exit(1); }
-  });
-program.parse(process.argv);
+export { runBatch, retryDelayMs } from "./pipeline.ts";
