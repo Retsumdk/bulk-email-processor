@@ -100,6 +100,10 @@ Loop:       {{#each teams}} - {{this}} {{/each}}
 Helper:     {{upper name}}  {{lower tag}}  {{default plan "starter"}}
 Nested:     {{#each users}}{{#if active}}{{name}};{{/if}}{{/each}}
 Comment:    {{! visible only to readers of the template }}
+
+Conditionals treat `0`, `false`, empty strings, `null`, and `undefined` as false —
+so a CSV `active` column of `yes`/`no` is matched by `{{#if active}}`.
+Auto-escaping makes `{{ name }}` safe even when a field contains HTML.
 ```
 
 Escaping is automatic: `render("<p>{{name}}</p>", { name: "<script>x()</script>" })`
